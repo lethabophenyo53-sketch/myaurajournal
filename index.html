@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Aura Journal</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins&family=Playfair+Display&family=Montserrat&family=Quicksand&family=Pacifico&family=Raleway&family=Lora&family=Nunito&family=Dancing+Script&family=Oswald&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<audio id="bgMusic" loop></audio>
+
+<!-- COVER -->
+<div id="cover" class="cover">
+  <div class="cover-box" onclick="enterApp()">
+    <img src="Cover page.jpg">
+    <h1>✨ Aura Journal ✨</h1>
+    <p>Tap to enter</p>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="home" class="screen hidden">
+  <h1 class="main-title">🌸 My Journal</h1>
+  <p style="text-align:center; opacity:0.7;">
+  Your safe space to grow, reflect & glow ✨
+</p>
+
+<div style="
+background:linear-gradient(135deg,#ffe6f0,#e6f0ff);
+padding:15px;
+border-radius:15px;
+margin:15px 0;
+text-align:center;
+">
+💖 “You are becoming the best version of yourself.”
+</div>
+
+  <div class="home-buttons">
+    <button onclick="openJournal()">✨ New Entry</button>
+    <button onclick="openSettings()">⚙️ Settings</button>
+	<button onclick="openJournalPage(1)">📅 Weekly Planner</button>
+    <button onclick="openJournalPage(3)">✅ To-Do List</button>
+  </div>
+  
+  <div class="home-image">
+ <center><img src="bg5.jpg" alt="journal aesthetic"></center>
+</div>
+
+  <div id="entries" class="entries"></div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="screen hidden">
+
+<div class="settings-header">
+  <h2>⚙️ Settings</h2>
+</div>
+
+<label>Font</label>
+<select onchange="setFont(this.value)">
+<option>Poppins</option>
+<option>Playfair Display</option>
+<option>Montserrat</option>
+<option>Quicksand</option>
+<option>Pacifico</option>
+<option>Raleway</option>
+<option>Lora</option>
+<option>Nunito</option>
+<option>Dancing Script</option>
+<option>Oswald</option>
+</select>
+
+<label>Music</label>
+<select onchange="setMusic(this.value)">
+<option value="">None</option>
+<option value="music1.mp3">Soft</option>
+<option value="music2.mp3">Rain</option>
+<option value="music3.mp3">Lofi</option>
+<option value="music4.mp3">Ocean</option>
+<option value="music5.mp3">Wind</option>
+<option value="music6.mp3">Night</option>
+<option value="music7.mp3">Focus</option>
+<option value="music8.mp3">Nature</option>
+<option value="music9.mp3">Dreamy</option>
+<option value="music10.mp3">Calm</option>
+</select>
+
+<label>Background</label>
+<select onchange="setBG(this.value)">
+<option value="">Default</option>
+<option value="bg1.jpg">Pink bomb</option>
+<option value="bg2.jpg">Sky</option>
+<option value="bg3.jpg">Stars</option>
+<option value="bg4.jpg">Ocean</option>
+</select>
+
+<label>Background Color</label>
+<select onchange="setBGColor(this.value)">
+  <option value="">Default</option>
+  <option value="#fbc2eb,#a6c1ee">Pink Purple</option>
+  <option value="#a1c4fd,#c2e9fb">Blue Sky</option>
+  <option value="#d4fc79,#96e6a1">Green Fresh</option>
+  <option value="#fddb92,#d1fdff">Soft Sunset</option>
+  <option value="#ffecd2,#fcb69f">Warm Glow</option>
+</select>
+
+<button onclick="goHome()">⬅ Back</button>
+
+</div>
+
+<!-- JOURNAL -->
+<!-- JOURNAL -->
+<div id="journal" class="screen hidden">
+
+<div class="page active">
+
+<h2 class="title">💖 About Me</h2>
+
+<div class="about-container">
+
+  <!-- LEFT: IMAGE -->
+  <div class="about-photo">
+  <label for="photoUpload">📸 Add Your Photo</label>
+  <input type="file" id="photoUpload" accept="image/*">
+
+  <img id="profilePreview" src="" alt="">
+
+  <button class="remove-photo" onclick="removePhoto()">❌ Remove</button>
+</div>
+
+  <!-- RIGHT: INFO -->
+  <div class="about-info">
+
+    <div class="about-card">
+      <h3>💫 Who are you?</h3>
+      <textarea placeholder="Your name, personality..."></textarea>
+    </div>
+
+    <div class="about-card">
+      <h3>🎂 Age</h3>
+      <textarea></textarea>
+    </div>
+
+    <div class="about-card">
+      <h3>🌈 Dream Life</h3>
+      <textarea></textarea>
+    </div>
+
+    <div class="about-card">
+      <h3>💖 Likes</h3>
+      <textarea placeholder="Music, food, hobbies..."></textarea>
+    </div>
+
+    <div class="about-card">
+      <h3>🌍 Where you from?</h3>
+      <textarea></textarea>
+    </div>
+
+
+  </div>
+</div>
+
+<div class="nav">
+  <button onclick="goHome()">🏠</button>
+  <button onclick="next()">➡</button>
+</div>
+
+</div>
+
+<!-- sparkles layer -->
+<div class="sparkles"></div>
+
+
+<div class="page">
+  <h2 class="title">📅 Weekly Planner</h2>
+
+  <div class="week">
+
+    <!-- LEFT SIDE -->
+    <div class="week-left">
+      <input placeholder="Week of (6-12Apr)...">
+
+      <textarea class="notes" placeholder="✨ Notes / Goals for the week..."></textarea>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="week-right">
+
+      <div class="day-card"><h4>Mon</h4><textarea></textarea></div>
+      <div class="day-card"><h4>Tue</h4><textarea></textarea></div>
+      <div class="day-card"><h4>Wed</h4><textarea></textarea></div>
+      <div class="day-card"><h4>Thu</h4><textarea></textarea></div>
+      <div class="day-card"><h4>Fri</h4><textarea></textarea></div>
+      <div class="day-card"><h4>Sat</h4><textarea></textarea></div>
+      <div class="day-card"><h4>Sun</h4><textarea></textarea></div>
+
+<div class="nav">
+ <button onclick="saveWeek()">💾 Save Week</button>
+  <button onclick="goHome()">🏠</button>
+  <button onclick="prev()">⬅</button>
+  <button onclick="next()">➡</button>
+</div>
+
+    </div>
+
+  </div>
+</div>
+
+
+<div class="page">
+  <h2 class="title">🌷 Daily Reflection</h2>
+
+  <input type="date" id="date" class="date-input">
+
+  <div class="reflection-grid">
+
+    <div class="reflect-card">
+      <h4>💭 How do you feel?</h4>
+      <textarea id="feel"></textarea>
+    </div>
+
+    <div class="reflect-card">
+      <h4>🌸 Why do you feel this way?</h4>
+      <textarea id="why"></textarea>
+    </div>
+
+    <div class="reflect-card full">
+      <h4>📖 What happened today?</h4>
+      <textarea id="journalText" class="big"></textarea>
+    </div>
+
+  </div>
+  
+  <div class="nav">
+  <button onclick="goHome()">🏠</button>
+  <button onclick="prev()">⬅</button>
+  <button onclick="next()">➡</button>
+</div>
+
+</div>
+
+<div class="page">
+  <h2 class="title">💖 To-Do List</h2>
+
+  <div class="todo-input">
+    <input id="taskInput" placeholder="✨ Add a task...">
+    <button onclick="addTask()">Add</button>
+  </div>
+
+  <div id="taskList" class="todo-list"></div>
+  
+  <div class="nav">
+  <button onclick="goHome()">🏠</button>
+  <button onclick="prev()">⬅</button>
+  <button onclick="next()">➡</button>
+</div>
+
+</div>
+
+<div class="page">
+  <h2 class="title">📖 Real Story</h2>
+
+  <p class="subtitle">
+    Your journey, your growth, your truth 💖
+  </p>
+
+  <div class="story-card">
+    <textarea id="storyText" placeholder="Write your real story here..."></textarea>
+  </div>
+
+  <button class="save-btn" onclick="saveStory()">💾 Save Story</button>
+  
+ <div class="nav">
+  <button onclick="goHome()">🏠</button>
+  <button onclick="prev()">⬅</button>
+  <button onclick="next()">➡</button>
+</div>
+</div>
+
+<div class="page">
+<h2>✨ Glow Routine</h2>
+
+<div class="glow">
+<label><input type="checkbox"> Water</label>
+<label><input type="checkbox"> Skincare</label>
+<label><input type="checkbox"> Exercise</label>
+<label><input type="checkbox"> Read</label>
+<label><input type="checkbox"> Positive Mind</label>
+<label><input type="checkbox"> Rest</label>
+
+<div class="nav">
+  <button onclick="goHome()">🏠</button>
+  <button onclick="prev()">⬅</button>
+  <button onclick="next()">➡</button>
+</div>
+
+</div>
+
+</div>
+
+<div class="page">
+<h2>🌸 Daily Affirmation</h2>
+
+<textarea placeholder="I am strong, I am growing..."></textarea>
+
+<div class="nav">
+  <button onclick="goHome()">🏠</button>
+  <button onclick="prev()">⬅</button>
+  <button onclick="next()">➡</button>
+</div>
+
+</div>
+
+
+<div class="page">
+  <h2 class="title">💌 Closing</h2>
+
+  <p class="subtitle">
+    Pause. Reflect. Appreciate your journey ✨
+  </p>
+
+  <div class="closing-card">
+    <h4>🌸 How do you feel right now?</h4>
+    <textarea class="big"></textarea>
+  </div>
+
+  <div class="closing-card">
+    <h4>🙏 What are you grateful for?</h4>
+    <textarea class="big"></textarea>
+  </div>
+
+  <div class="closing-quote">
+    ✨ You showed up. You tried. That’s enough. ✨
+  </div>
+
+  <button class="save-btn" onclick="saveEntry()">💾 Save Entry</button>
+  <button class="finish-btn" onclick="goHome()">🏠 Finish</button>
+  
+  <div class="nav">
+  <button onclick="goHome()">🏠</button>
+  <button onclick="prev()">⬅</button>
+</div>
+
+</div>
+</div>
+
+<div id="planner" class="screen hidden">
+
+  <h2>📅 Weekly Planner</h2>
+
+  <input id="weekTitle" placeholder="Week title">
+
+  <textarea id="weekNotes" placeholder="Weekly goals"></textarea>
+
+  <div>
+    <textarea id="mon" placeholder="Mon"></textarea>
+    <textarea id="tue" placeholder="Tue"></textarea>
+    <textarea id="wed" placeholder="Wed"></textarea>
+    <textarea id="thu" placeholder="Thu"></textarea>
+    <textarea id="fri" placeholder="Fri"></textarea>
+    <textarea id="sat" placeholder="Sat"></textarea>
+    <textarea id="sun" placeholder="Sun"></textarea>
+  </div>
+
+  <button onclick="saveWeek()">💾 Save</button>
+  <button onclick="goHome()">🏠 Home</button>
+
+</div>
+
+<div id="todoScreen" class="screen hidden">
+
+  <h2>✅ To-Do List</h2>
+
+  <input id="taskInput" placeholder="Add task">
+  <button onclick="addTask()">Add</button>
+
+  <div id="taskList"></div>
+
+  <button onclick="goHome()">🏠 Home</button>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
