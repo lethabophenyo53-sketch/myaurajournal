@@ -753,4 +753,78 @@ color: #555;
 
 .nav button {
   margin: 5px;
+
+/* ================= MOBILE FIX ================= */
+@media (max-width: 768px) {
+
+  /* GENERAL SPACING */
+  .screen {
+    padding: 10px;
+  }
+
+  /* HOME BUTTONS STACK */
+  .home-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* JOURNAL PAGES FULL WIDTH */
+  .page {
+    padding: 12px;
+  }
+
+  /* TEXT BIGGER FOR PHONE */
+  textarea {
+    font-size: 16px;
+  }
+
+  /* WEEKLY PLANNER STACK */
+  .week {
+    flex-direction: column;
+  }
+
+  .week-left,
+  .week-right {
+    width: 100%;
+  }
+
+  .week-right {
+    grid-template-columns: 1fr; /* ONE COLUMN */
+  }
+
+  /* ABOUT PAGE STACK */
+  .about-container {
+    flex-direction: column;
+  }
+
+  .about-photo,
+  .about-info {
+    width: 100%;
+  }
+
+  .about-info {
+    grid-template-columns: 1fr;
+  }
+
+  /* JOURNEY GRID FIX */
+  .map-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* REFLECTION GRID */
+  .reflection-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* MAKE BUTTONS BIGGER */
+  button {
+    width: 100%;
+    padding: 12px;
+  }
+
+  /* IMAGE FIX */
+  .home-image img {
+    width: 100%;
+  }
+}
 }
