@@ -580,7 +580,7 @@ color: #555;
 
 .home-image img {
   width: 80%;
-  max
+  max-width: 300px
 
 .save-msg {
   position: fixed;
