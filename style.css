@@ -828,3 +828,28 @@ color: #555;
   }
 }
 }
+
+/* 📱 MOBILE FIX */
+@media (max-width: 600px){
+
+  .week{
+    flex-direction: column;
+  }
+
+  .week-left,
+  .week-right{
+    width: 100%;
+  }
+
+  .week-right{
+    grid-template-columns: 1fr; /* 👈 ONE COLUMN instead of 2 */
+  }
+
+  .day-card textarea{
+    height: 90px; /* 👈 more space to write */
+  }
+
+}
+
+
+
