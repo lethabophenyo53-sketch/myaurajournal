@@ -1,19 +1,21 @@
+// ================= GLOBAL =================
 let currentPage = 0;
 let pages = [];
 
-/* ================= INIT ================= */
+// ================= INIT =================
 window.onload = function () {
-  pages = document.querySelectorAll(".book .page");
+  pages = document.querySelectorAll("#journal .page");
 
   loadAbout();
-  loadTasks();
   loadWeek();
   loadCurrent();
+  loadTasks();
+  loadStory();
 
   showPage(0);
 };
 
-/* ================= PAGE SYSTEM ================= */
+// ================= PAGE SYSTEM =================
 function showPage(index) {
   pages.forEach(p => p.classList.remove("active"));
 
@@ -31,29 +33,51 @@ function prev() {
   if (currentPage > 0) showPage(currentPage - 1);
 }
 
-/* ================= COVER ================= */
-function openBook() {
-  let cover = document.querySelector(".cover");
-  let book = document.querySelector(".book");
-
-  if (cover) cover.style.display = "none";
-  if (book) book.style.display = "block";
+// ================= NAVIGATION =================
+function enterApp() {
+  document.getElementById("cover").style.display = "none";
+  document.getElementById("home").classList.remove("hidden");
 }
 
-/* ================= SAFE GET ================= */
+function openJournal() {
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("settings").classList.add("hidden");
+  document.getElementById("journal").classList.remove("hidden");
+
+  showPage(0);
+}
+
+function openJournalPage(i) {
+  openJournal();
+  showPage(i);
+}
+
+function openSettings() {
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("settings").classList.remove("hidden");
+}
+
+function goHome() {
+  document.getElementById("journal").classList.add("hidden");
+  document.getElementById("settings").classList.add("hidden");
+  document.getElementById("home").classList.remove("hidden");
+
+  loadEntries();
+}
+
+// ================= SAFE GET =================
 function get(id) {
-  let el = document.getElementById(id);
-  if (!el) console.warn("Missing element:", id);
-  return el;
+  return document.getElementById(id);
 }
 
-/* ================= ABOUT ================= */
+// ================= ABOUT =================
 function saveAbout() {
   const data = {
     name: get("name")?.value || "",
     age: get("age")?.value || "",
     dreams: get("dreams")?.value || "",
-    energy: get("energy")?.value || ""
+    likes: get("likes")?.value || "",
+    place: get("place")?.value || ""
   };
 
   localStorage.setItem("aboutMe", JSON.stringify(data));
@@ -65,35 +89,11 @@ function loadAbout() {
   if (get("name")) get("name").value = data.name || "";
   if (get("age")) get("age").value = data.age || "";
   if (get("dreams")) get("dreams").value = data.dreams || "";
-  if (get("energy")) get("energy").value = data.energy || "";
+  if (get("likes")) get("likes").value = data.likes || "";
+  if (get("place")) get("place").value = data.place || "";
 }
 
-/* ================= TODO ================= */
-function getTodayKey() {
-  return "todo_" + new Date().toDateString();
-}
-
-function loadTasks() {
-  let tasks = JSON.parse(localStorage.getItem(getTodayKey()) || "[]");
-
-  for (let i = 1; i <= 4; i++) {
-    let el = get("todo" + i);
-    if (el) el.value = tasks[i - 1]?.text || "";
-  }
-}
-
-function saveTasks() {
-  let tasks = [];
-
-  for (let i = 1; i <= 4; i++) {
-    let val = get("todo" + i)?.value || "";
-    tasks.push({ text: val });
-  }
-
-  localStorage.setItem(getTodayKey(), JSON.stringify(tasks));
-}
-
-/* ================= WEEK ================= */
+// ================= WEEK =================
 function getWeekKey() {
   let now = new Date();
   let week = Math.ceil(now.getDate() / 7);
@@ -108,11 +108,11 @@ function saveWeek() {
     thu: get("thu")?.value || "",
     fri: get("fri")?.value || "",
     sat: get("sat")?.value || "",
-    sun: get("sun")?.value || "",
-    notes: get("weekly_notes")?.value || ""
+    sun: get("sun")?.value || ""
   };
 
   localStorage.setItem(getWeekKey(), JSON.stringify(data));
+  showSaveMessage();
 }
 
 function loadWeek() {
@@ -125,21 +125,20 @@ function loadWeek() {
   if (get("fri")) get("fri").value = data.fri || "";
   if (get("sat")) get("sat").value = data.sat || "";
   if (get("sun")) get("sun").value = data.sun || "";
-  if (get("weekly_notes")) get("weekly_notes").value = data.notes || "";
 }
 
-/* ================= AUTO SAVE ================= */
+// ================= DAILY =================
 function autoSave() {
-  saveTasks();
-  saveWeek();
-
   const data = {
     feel: get("feel")?.value || "",
     why: get("why")?.value || "",
-    day: get("day")?.value || ""
+    text: get("journalText")?.value || "",
+    date: get("date")?.value || ""
   };
 
   localStorage.setItem("todayEntry", JSON.stringify(data));
+
+  saveTasks();
 }
 
 function loadCurrent() {
@@ -147,28 +146,160 @@ function loadCurrent() {
 
   if (get("feel")) get("feel").value = data.feel || "";
   if (get("why")) get("why").value = data.why || "";
-  if (get("day")) get("day").value = data.day || "";
+  if (get("journalText")) get("journalText").value = data.text || "";
+  if (get("date")) get("date").value = data.date || "";
 }
 
-/* FIXED AUTO SAVE */
+// ================= TODO =================
+function getTodayKey() {
+  return "todo_" + new Date().toDateString();
+}
+
+function loadTasks() {
+  let tasks = JSON.parse(localStorage.getItem(getTodayKey()) || "[]");
+
+  const list = get("taskList");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  tasks.forEach((t, i) => {
+    const div = document.createElement("div");
+
+    div.innerHTML = `
+      <span>${t.text}</span>
+      <button onclick="removeTask(${i})">❌</button>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+function addTask() {
+  const input = get("taskInput");
+  if (!input || !input.value.trim()) return;
+
+  let tasks = JSON.parse(localStorage.getItem(getTodayKey()) || "[]");
+
+  tasks.push({ text: input.value });
+
+  localStorage.setItem(getTodayKey(), JSON.stringify(tasks));
+
+  input.value = "";
+  loadTasks();
+}
+
+function removeTask(index) {
+  let tasks = JSON.parse(localStorage.getItem(getTodayKey()) || "[]");
+
+  tasks.splice(index, 1);
+
+  localStorage.setItem(getTodayKey(), JSON.stringify(tasks));
+  loadTasks();
+}
+
+function saveTasks() {
+  // already saved in add/remove
+}
+
+// ================= STORY =================
+function saveStory() {
+  localStorage.setItem("story", get("storyText")?.value || "");
+  showSaveMessage();
+}
+
+function loadStory() {
+  if (get("storyText")) {
+    get("storyText").value = localStorage.getItem("story") || "";
+  }
+}
+
+// ================= ENTRIES =================
+function saveEntry() {
+  let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+
+  entries.push({
+    text: get("journalText")?.value || "",
+    date: new Date().toLocaleDateString()
+  });
+
+  localStorage.setItem("entries", JSON.stringify(entries));
+  showSaveMessage();
+}
+
+function loadEntries() {
+  const container = get("entries");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+
+  entries.slice().reverse().forEach(e => {
+    const div = document.createElement("div");
+    div.className = "entry";
+
+    div.innerHTML = `
+      <h4>${e.date}</h4>
+      <p>${e.text}</p>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+// ================= SETTINGS =================
+function setFont(font) {
+  document.body.style.fontFamily = font;
+  localStorage.setItem("font", font);
+}
+
+function setMusic(src) {
+  const audio = get("bgMusic");
+
+  if (!audio) return;
+
+  audio.pause();
+
+  if (src) {
+    audio.src = src;
+    audio.play().catch(()=>{});
+  }
+}
+
+function setBG(img) {
+  if (!img) {
+    document.body.style.background = "linear-gradient(135deg,#fbc2eb,#a6c1ee)";
+    return;
+  }
+
+  document.body.style.background = `url(${img})`;
+  document.body.style.backgroundSize = "cover";
+}
+
+function setBGColor(gradient) {
+  if (!gradient) return;
+
+  document.body.style.background = `linear-gradient(135deg, ${gradient})`;
+}
+
+// ================= SAVE MESSAGE =================
+function showSaveMessage() {
+  let msg = document.querySelector(".save-msg");
+
+  if (!msg) return;
+
+  msg.style.opacity = "1";
+
+  setTimeout(() => {
+    msg.style.opacity = "0";
+  }, 1500);
+}
+
+// ================= AUTO SAVE =================
 let saveTimeout;
+
 document.addEventListener("input", () => {
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(autoSave, 500);
 });
-
-/* ================= EMOJI RAIN ================= */
-function rain(emoji) {
-  for (let i = 0; i < 20; i++) {
-    let drop = document.createElement("div");
-    drop.className = "emoji-drop";
-    drop.innerText = emoji;
-
-    drop.style.left = Math.random() * 100 + "vw";
-    drop.style.animationDuration = (Math.random() * 2 + 2) + "s";
-
-    document.body.appendChild(drop);
-
-    setTimeout(() => drop.remove(), 4000);
-  }
-}
