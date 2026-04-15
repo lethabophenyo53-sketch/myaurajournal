@@ -94,6 +94,18 @@ function loadAbout() {
   if (aboutDream) aboutDream.value = data.dream || "";
   if (aboutLikes) aboutLikes.value = data.likes || "";
   if (aboutPlace) aboutPlace.value = data.place || "";
+   if(about.name){
+  currentPage = 1;
+}
+  function removePhoto(){
+  const img = document.getElementById("profilePreview");
+
+  img.src = "";
+  img.style.display = "none";
+
+  localStorage.removeItem("profileImage");
+
+  showSaveMessage("Photo removed ❌");
 }
 
 /* auto save about */
