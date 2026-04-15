@@ -303,3 +303,55 @@ document.addEventListener("input", () => {
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(autoSave, 500);
 });
+
+
+
+/* ================= PHOTO UPLOAD ================= */
+
+// load saved photo when app starts
+window.addEventListener("load", () => {
+  const savedPhoto = localStorage.getItem("profilePhoto");
+
+  if (savedPhoto) {
+    const img = document.getElementById("profilePreview");
+    if (img) {
+      img.src = savedPhoto;
+      img.style.display = "block";
+    }
+  }
+});
+
+// when user uploads photo
+const photoInput = document.getElementById("photoUpload");
+
+if (photoInput) {
+  photoInput.addEventListener("change", function () {
+    const file = this.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function () {
+      const img = document.getElementById("profilePreview");
+
+      img.src = reader.result;
+      img.style.display = "block";
+
+      // save to localStorage
+      localStorage.setItem("profilePhoto", reader.result);
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+// remove photo
+function removePhoto() {
+  const img = document.getElementById("profilePreview");
+
+  img.src = "";
+  img.style.display = "none";
+
+  localStorage.removeItem("profilePhoto");
+}
