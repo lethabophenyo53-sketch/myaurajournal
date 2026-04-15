@@ -12,6 +12,11 @@ window.addEventListener("load", () => {
   loadCurrent();
 
   showPage(0);
+
+  // auto save typing
+  document.querySelectorAll("#journal textarea").forEach(el=>{
+    el.addEventListener("input", autoSaveCurrent);
+  });
 });
 
 /* ================= PAGE SYSTEM ================= */
@@ -53,19 +58,18 @@ function goHome() {
 function openJournal() {
   document.getElementById("home").classList.add("hidden");
   document.getElementById("journal").classList.remove("hidden");
-  pages = document.querySelectorAll("#journal .page");
-  showPage(0);
-  
-  if(about.name){
-  document.querySelector(".page").style.display = "none";
-}
-
-function openJournalPage(index) {
-  document.getElementById("home").classList.add("hidden");
-  document.getElementById("journal").classList.remove("hidden");
 
   pages = document.querySelectorAll("#journal .page");
-  showPage(index);
+
+  let about = JSON.parse(localStorage.getItem("aboutMe") || "{}");
+
+  if (about && about.name && about.name.trim() !== "") {
+    currentPage = 1; // skip About Me
+  } else {
+    currentPage = 0;
+  }
+
+  showPage(currentPage);
 }
 
 function openSettings() {
@@ -76,11 +80,11 @@ function openSettings() {
 /* ================= ABOUT ME ================= */
 function saveAbout() {
   const data = {
-    name: aboutName.value || "",
-    age: aboutAge.value || "",
-    dream: aboutDream.value || "",
-    likes: aboutLikes.value || "",
-    place: aboutPlace.value || ""
+    name: document.getElementById("aboutName")?.value || "",
+    age: document.getElementById("aboutAge")?.value || "",
+    dream: document.getElementById("aboutDream")?.value || "",
+    likes: document.getElementById("aboutLikes")?.value || "",
+    place: document.getElementById("aboutPlace")?.value || ""
   };
 
   localStorage.setItem("aboutMe", JSON.stringify(data));
@@ -89,26 +93,23 @@ function saveAbout() {
 function loadAbout() {
   let data = JSON.parse(localStorage.getItem("aboutMe") || "{}");
 
-  if (aboutName) aboutName.value = data.name || "";
-  if (aboutAge) aboutAge.value = data.age || "";
-  if (aboutDream) aboutDream.value = data.dream || "";
-  if (aboutLikes) aboutLikes.value = data.likes || "";
-  if (aboutPlace) aboutPlace.value = data.place || "";
-   if(about.name){
-  currentPage = 1;
-}
-  function removePhoto(){
-  const img = document.getElementById("profilePreview");
+  if (document.getElementById("aboutName"))
+    document.getElementById("aboutName").value = data.name || "";
 
-  img.src = "";
-  img.style.display = "none";
+  if (document.getElementById("aboutAge"))
+    document.getElementById("aboutAge").value = data.age || "";
 
-  localStorage.removeItem("profileImage");
+  if (document.getElementById("aboutDream"))
+    document.getElementById("aboutDream").value = data.dream || "";
 
-  showSaveMessage("Photo removed ❌");
+  if (document.getElementById("aboutLikes"))
+    document.getElementById("aboutLikes").value = data.likes || "";
+
+  if (document.getElementById("aboutPlace"))
+    document.getElementById("aboutPlace").value = data.place || "";
 }
 
-/* auto save about */
+/* AUTO SAVE ABOUT */
 document.addEventListener("input", (e) => {
   if (
     e.target.id === "aboutName" ||
@@ -121,16 +122,30 @@ document.addEventListener("input", (e) => {
   }
 });
 
+/* PHOTO REMOVE */
+function removePhoto(){
+  const img = document.getElementById("profilePreview");
+
+  if(!img) return;
+
+  img.src = "";
+  img.style.display = "none";
+
+  localStorage.removeItem("profileImage");
+
+  showSaveMessage("Photo removed ❌");
+}
+
 /* ================= ENTRIES ================= */
 function saveEntry() {
   let entries = JSON.parse(localStorage.getItem("entries") || "[]");
 
   const entry = {
     date: new Date().toLocaleString(),
-    reflection: journalText?.value || "",
-    feeling: feel?.value || "",
-    why: why?.value || "",
-    story: storyText?.value || ""
+    reflection: document.getElementById("journalText")?.value || "",
+    feeling: document.getElementById("feel")?.value || "",
+    why: document.getElementById("why")?.value || "",
+    story: document.getElementById("storyText")?.value || ""
   };
 
   entries.unshift(entry);
@@ -155,12 +170,13 @@ function loadEntries() {
     let text = e.reflection || e.story || "No content";
 
     div.innerHTML = `
-  <p><b>${e.date}</b></p>
-  <p>${text.substring(0,50)}...</p>
-  <button onclick="viewEntry(${i})">📖 Open</button>
-  <button onclick="deleteEntry(${i})">❌ Delete</button>
-  <hr>
-`;
+      <p><b>${e.date}</b></p>
+      <p>${text.substring(0,50)}...</p>
+      <button onclick="viewEntry(${i})">📖 Open</button>
+      <button onclick="deleteEntry(${i})">❌ Delete</button>
+      <hr>
+    `;
+
     box.appendChild(div);
   });
 }
@@ -174,13 +190,15 @@ function deleteEntry(i) {
   loadEntries();
 }
 
-/* ================= TODO LIST ================= */
+/* ================= TODO ================= */
 function getTodayKey() {
   return "todo_" + new Date().toDateString();
 }
 
 function addTask() {
-  let text = taskInput.value.trim();
+  let input = document.getElementById("taskInput");
+  let text = input.value.trim();
+
   if (!text) return;
 
   let tasks = JSON.parse(localStorage.getItem(getTodayKey()) || "[]");
@@ -189,7 +207,7 @@ function addTask() {
 
   localStorage.setItem(getTodayKey(), JSON.stringify(tasks));
 
-  taskInput.value = "";
+  input.value = "";
   loadTasks();
 }
 
@@ -220,19 +238,16 @@ function toggleTask(i) {
   let tasks = JSON.parse(localStorage.getItem(getTodayKey()) || "[]");
   tasks[i].done = !tasks[i].done;
   localStorage.setItem(getTodayKey(), JSON.stringify(tasks));
-  loadTasks();
 }
 
 function deleteTask(i) {
   let tasks = JSON.parse(localStorage.getItem(getTodayKey()) || "[]");
-
   tasks.splice(i, 1);
-
   localStorage.setItem(getTodayKey(), JSON.stringify(tasks));
   loadTasks();
 }
 
-/* ================= WEEKLY PLANNER ================= */
+/* ================= WEEK ================= */
 function getWeekKey() {
   let now = new Date();
   let year = now.getFullYear();
@@ -242,91 +257,38 @@ function getWeekKey() {
 
 function saveWeek() {
   const data = {
-    title: weekTitle?.value || "",
-    notes: weekNotes?.value || "",
-    mon: mon?.value || "",
-    tue: tue?.value || "",
-    wed: wed?.value || "",
-    thu: thu?.value || "",
-    fri: fri?.value || "",
-    sat: sat?.value || "",
-    sun: sun?.value || ""
+    title: document.getElementById("weekTitle")?.value || "",
+    notes: document.getElementById("weekNotes")?.value || "",
+    mon: document.getElementById("mon")?.value || "",
+    tue: document.getElementById("tue")?.value || "",
+    wed: document.getElementById("wed")?.value || "",
+    thu: document.getElementById("thu")?.value || "",
+    fri: document.getElementById("fri")?.value || "",
+    sat: document.getElementById("sat")?.value || "",
+    sun: document.getElementById("sun")?.value || ""
   };
 
   localStorage.setItem(getWeekKey(), JSON.stringify(data));
-  showSaveMessage("Weekly plan saved 💖");
 }
 
 function loadWeek() {
   let data = JSON.parse(localStorage.getItem(getWeekKey()) || "{}");
 
-  if (!weekTitle) return;
+  if (!document.getElementById("weekTitle")) return;
 
-  weekTitle.value = data.title || "";
-  weekNotes.value = data.notes || "";
-  mon.value = data.mon || "";
-  tue.value = data.tue || "";
-  wed.value = data.wed || "";
-  thu.value = data.thu || "";
-  fri.value = data.fri || "";
-  sat.value = data.sat || "";
-  sun.value = data.sun || "";
+  document.getElementById("weekTitle").value = data.title || "";
+  document.getElementById("weekNotes").value = data.notes || "";
+
+  document.getElementById("mon").value = data.mon || "";
+  document.getElementById("tue").value = data.tue || "";
+  document.getElementById("wed").value = data.wed || "";
+  document.getElementById("thu").value = data.thu || "";
+  document.getElementById("fri").value = data.fri || "";
+  document.getElementById("sat").value = data.sat || "";
+  document.getElementById("sun").value = data.sun || "";
 }
 
-/* ================= MUSIC ================= */
-function setMusic(src) {
-  let music = document.getElementById("bgMusic");
-  if (!music) return;
-
-  music.src = src;
-  music.play().catch(() => {});
-}
-
-/* ================= BACKGROUND ================= */
-function setBG(img) {
-  if (!img) {
-    document.body.style.background = "linear-gradient(135deg,#fbc2eb,#a6c1ee)";
-    return;
-  }
-
-  document.body.style.backgroundImage = `url(${img})`;
-  document.body.style.backgroundSize = "cover";
-}
-
-function setBGColor(colors) {
-  if (!colors) {
-    document.body.style.background = "linear-gradient(135deg,#fbc2eb,#a6c1ee)";
-    return;
-  }
-
-  let c = colors.split(",");
-  document.body.style.background = `linear-gradient(135deg, ${c[0]}, ${c[1]})`;
-}
-
-/* ================= SAVE MESSAGE ================= */
-function showSaveMessage(text = "Saved 💖") {
-  let msg = document.getElementById("saveMsg");
-  if (!msg) return;
-
-  msg.innerText = text;
-  msg.style.opacity = "1";
-
-  setTimeout(() => {
-    msg.style.opacity = "0";
-  }, 2000);
-}
-
-/* ================= FONT ================= */
-function setFont(font) {
-  if (!font) return;
-
-  document.body.style.fontFamily = font;
-}
-
-
-
-/* ================= AUTO SAVE CURRENT WORK ================= */
-
+/* ================= AUTO SAVE ================= */
 function autoSaveCurrent(){
   const data = {
     reflection: document.getElementById("journalText")?.value || "",
@@ -347,26 +309,31 @@ function loadCurrent(){
   if(data.story) document.getElementById("storyText").value = data.story;
 }
 
-/* SAVE WHILE USER TYPES */
-document.querySelectorAll("#journal textarea").forEach(el=>{
-  el.addEventListener("input", autoSaveCurrent);
-});
-
+/* ================= VIEW ENTRY ================= */
 function viewEntry(i){
   let entries = JSON.parse(localStorage.getItem("entries") || "[]");
   let e = entries[i];
 
-  alert(
-`📅 ${e.date}
+  alert(`📅 ${e.date}
 
-💭 Feeling: ${e.feeling}
+💭 ${e.feeling}
 
-🌸 Why: ${e.why}
+🌸 ${e.why}
 
-📖 Reflection:
-${e.reflection}
+📖 ${e.reflection}
 
-📚 Story:
-${e.story}`
-  );
+📚 ${e.story}`);
+}
+
+/* ================= MESSAGE ================= */
+function showSaveMessage(text="Saved 💖"){
+  let msg = document.getElementById("saveMsg");
+  if (!msg) return;
+
+  msg.innerText = text;
+  msg.style.opacity = "1";
+
+  setTimeout(()=>{
+    msg.style.opacity = "0";
+  },2000);
 }
