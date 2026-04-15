@@ -9,6 +9,7 @@ window.addEventListener("load", () => {
   loadEntries();
   loadTasks();
   loadWeek();
+  loadCurrent();
 
   showPage(0);
 });
@@ -54,6 +55,9 @@ function openJournal() {
   document.getElementById("journal").classList.remove("hidden");
   pages = document.querySelectorAll("#journal .page");
   showPage(0);
+  
+  if(about.name){
+  document.querySelector(".page").style.display = "none";
 }
 
 function openJournalPage(index) {
@@ -139,12 +143,12 @@ function loadEntries() {
     let text = e.reflection || e.story || "No content";
 
     div.innerHTML = `
-      <b>${e.date}</b><br>
-      ${text}<br><br>
-      <button onclick="deleteEntry(${i})">🗑 Delete</button>
-      <hr>
-    `;
-
+  <p><b>${e.date}</b></p>
+  <p>${text.substring(0,50)}...</p>
+  <button onclick="viewEntry(${i})">📖 Open</button>
+  <button onclick="deleteEntry(${i})">❌ Delete</button>
+  <hr>
+`;
     box.appendChild(div);
   });
 }
@@ -305,4 +309,52 @@ function setFont(font) {
   if (!font) return;
 
   document.body.style.fontFamily = font;
+}
+
+
+
+/* ================= AUTO SAVE CURRENT WORK ================= */
+
+function autoSaveCurrent(){
+  const data = {
+    reflection: document.getElementById("journalText")?.value || "",
+    feeling: document.getElementById("feel")?.value || "",
+    why: document.getElementById("why")?.value || "",
+    story: document.getElementById("storyText")?.value || ""
+  };
+
+  localStorage.setItem("currentEntry", JSON.stringify(data));
+}
+
+function loadCurrent(){
+  let data = JSON.parse(localStorage.getItem("currentEntry") || "{}");
+
+  if(data.reflection) document.getElementById("journalText").value = data.reflection;
+  if(data.feeling) document.getElementById("feel").value = data.feeling;
+  if(data.why) document.getElementById("why").value = data.why;
+  if(data.story) document.getElementById("storyText").value = data.story;
+}
+
+/* SAVE WHILE USER TYPES */
+document.querySelectorAll("#journal textarea").forEach(el=>{
+  el.addEventListener("input", autoSaveCurrent);
+});
+
+function viewEntry(i){
+  let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+  let e = entries[i];
+
+  alert(
+`📅 ${e.date}
+
+💭 Feeling: ${e.feeling}
+
+🌸 Why: ${e.why}
+
+📖 Reflection:
+${e.reflection}
+
+📚 Story:
+${e.story}`
+  );
 }
