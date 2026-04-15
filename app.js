@@ -2,19 +2,16 @@ let currentPage = 0;
 let pages = [];
 
 /* ================= INIT ================= */
-window.addEventListener("load", () => {
+window.onload = function () {
   pages = document.querySelectorAll(".page");
 
   loadAbout();
   loadTasks();
   loadWeek();
   loadCurrent();
-  loadEntries();
-
-  setupAutoSave();
 
   showPage(0);
-});
+};
 
 /* ================= PAGE SYSTEM ================= */
 function showPage(index) {
@@ -40,13 +37,18 @@ function openBook() {
   document.querySelector(".book").style.display = "block";
 }
 
+/* ================= SAFE GET ================= */
+function get(id) {
+  return document.getElementById(id);
+}
+
 /* ================= ABOUT ================= */
 function saveAbout() {
   const data = {
-    name: document.getElementById("name")?.value || "",
-    age: document.getElementById("age")?.value || "",
-    dreams: document.getElementById("dreams")?.value || "",
-    energy: document.getElementById("energy")?.value || ""
+    name: get("name")?.value || "",
+    age: get("age")?.value || "",
+    dreams: get("dreams")?.value || "",
+    energy: get("energy")?.value || ""
   };
 
   localStorage.setItem("aboutMe", JSON.stringify(data));
@@ -55,18 +57,11 @@ function saveAbout() {
 function loadAbout() {
   let data = JSON.parse(localStorage.getItem("aboutMe") || "{}");
 
-  document.getElementById("name").value = data.name || "";
-  document.getElementById("age").value = data.age || "";
-  document.getElementById("dreams").value = data.dreams || "";
-  document.getElementById("energy").value = data.energy || "";
+  if (get("name")) get("name").value = data.name || "";
+  if (get("age")) get("age").value = data.age || "";
+  if (get("dreams")) get("dreams").value = data.dreams || "";
+  if (get("energy")) get("energy").value = data.energy || "";
 }
-
-/* AUTO SAVE ABOUT */
-document.addEventListener("input", (e) => {
-  if (e.target.closest(".profile-map")) {
-    saveAbout();
-  }
-});
 
 /* ================= TODO ================= */
 function getTodayKey() {
@@ -77,7 +72,7 @@ function loadTasks() {
   let tasks = JSON.parse(localStorage.getItem(getTodayKey()) || "[]");
 
   for (let i = 1; i <= 4; i++) {
-    let el = document.getElementById("todo" + i);
+    let el = get("todo" + i);
     if (el) el.value = tasks[i - 1]?.text || "";
   }
 }
@@ -86,7 +81,7 @@ function saveTasks() {
   let tasks = [];
 
   for (let i = 1; i <= 4; i++) {
-    let val = document.getElementById("todo" + i)?.value || "";
+    let val = get("todo" + i)?.value || "";
     tasks.push({ text: val });
   }
 
@@ -101,14 +96,14 @@ function getWeekKey() {
 
 function saveWeek() {
   const data = {
-    mon: document.getElementById("mon")?.value || "",
-    tue: document.getElementById("tue")?.value || "",
-    wed: document.getElementById("wed")?.value || "",
-    thu: document.getElementById("thu")?.value || "",
-    fri: document.getElementById("fri")?.value || "",
-    sat: document.getElementById("sat")?.value || "",
-    sun: document.getElementById("sun")?.value || "",
-    notes: document.getElementById("weekly_notes")?.value || ""
+    mon: get("mon")?.value || "",
+    tue: get("tue")?.value || "",
+    wed: get("wed")?.value || "",
+    thu: get("thu")?.value || "",
+    fri: get("fri")?.value || "",
+    sat: get("sat")?.value || "",
+    sun: get("sun")?.value || "",
+    notes: get("weekly_notes")?.value || ""
   };
 
   localStorage.setItem(getWeekKey(), JSON.stringify(data));
@@ -117,85 +112,44 @@ function saveWeek() {
 function loadWeek() {
   let data = JSON.parse(localStorage.getItem(getWeekKey()) || "{}");
 
-  document.getElementById("mon").value = data.mon || "";
-  document.getElementById("tue").value = data.tue || "";
-  document.getElementById("wed").value = data.wed || "";
-  document.getElementById("thu").value = data.thu || "";
-  document.getElementById("fri").value = data.fri || "";
-  document.getElementById("sat").value = data.sat || "";
-  document.getElementById("sun").value = data.sun || "";
-  document.getElementById("weekly_notes").value = data.notes || "";
+  if (get("mon")) get("mon").value = data.mon || "";
+  if (get("tue")) get("tue").value = data.tue || "";
+  if (get("wed")) get("wed").value = data.wed || "";
+  if (get("thu")) get("thu").value = data.thu || "";
+  if (get("fri")) get("fri").value = data.fri || "";
+  if (get("sat")) get("sat").value = data.sat || "";
+  if (get("sun")) get("sun").value = data.sun || "";
+  if (get("weekly_notes")) get("weekly_notes").value = data.notes || "";
 }
 
-/* ================= DAILY SAVE ================= */
-function getTodayJournalKey() {
-  return "journal_" + new Date().toISOString().split("T")[0];
-}
-
-function autoSaveCurrent() {
-  const data = {
-    feel: document.getElementById("feel")?.value || "",
-    why: document.getElementById("why")?.value || "",
-    day: document.getElementById("day")?.value || "",
-    notes: document.querySelector(".lined")?.value || "",
-    close: document.querySelector(".big-input")?.value || ""
-  };
-
-  localStorage.setItem(getTodayJournalKey(), JSON.stringify(data));
-
+/* ================= AUTO SAVE ================= */
+function autoSave() {
   saveTasks();
   saveWeek();
+
+  const data = {
+    feel: get("feel")?.value || "",
+    why: get("why")?.value || "",
+    day: get("day")?.value || ""
+  };
+
+  localStorage.setItem("todayEntry", JSON.stringify(data));
 }
 
 function loadCurrent() {
-  let data = JSON.parse(localStorage.getItem(getTodayJournalKey()) || "{}");
+  let data = JSON.parse(localStorage.getItem("todayEntry") || "{}");
 
-  document.getElementById("feel").value = data.feel || "";
-  document.getElementById("why").value = data.why || "";
-  document.getElementById("day").value = data.day || "";
+  if (get("feel")) get("feel").value = data.feel || "";
+  if (get("why")) get("why").value = data.why || "";
+  if (get("day")) get("day").value = data.day || "";
 }
 
-/* AUTO SAVE ALL INPUTS */
-function setupAutoSave() {
-  document.querySelectorAll("textarea, input").forEach(el => {
-    el.addEventListener("input", autoSaveCurrent);
-  });
-}
-
-/* ================= ENTRIES ================= */
-function saveEntry() {
-  let entries = JSON.parse(localStorage.getItem("entries") || "[]");
-
-  const entry = {
-    date: new Date().toLocaleString(),
-    feel: document.getElementById("feel")?.value || "",
-    why: document.getElementById("why")?.value || "",
-    day: document.getElementById("day")?.value || ""
-  };
-
-  entries.unshift(entry);
-  localStorage.setItem("entries", JSON.stringify(entries));
-
-  alert("Saved 💖");
-}
-
-function loadEntries() {
-  let box = document.getElementById("entries");
-  if (!box) return;
-
-  let entries = JSON.parse(localStorage.getItem("entries") || "[]");
-  box.innerHTML = "";
-
-  entries.forEach(e => {
-    let div = document.createElement("div");
-    div.innerHTML = `<b>${e.date}</b><br>${e.day.substring(0,40)}...`;
-    box.appendChild(div);
-  });
-}
+/* AUTO SAVE EVENTS */
+document.addEventListener("input", autoSave);
 
 /* ================= EMOJI RAIN ================= */
 function rain(emoji) {
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < 20; i++) {
     let drop = document.createElement("div");
     drop.className = "emoji-drop";
     drop.innerText = emoji;
