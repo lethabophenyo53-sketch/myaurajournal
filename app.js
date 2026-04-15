@@ -3,7 +3,7 @@ let pages = [];
 
 /* ================= INIT ================= */
 window.onload = function () {
-  pages = document.querySelectorAll(".page");
+  pages = document.querySelectorAll(".book .page");
 
   loadAbout();
   loadTasks();
@@ -33,13 +33,18 @@ function prev() {
 
 /* ================= COVER ================= */
 function openBook() {
-  document.querySelector(".cover").style.display = "none";
-  document.querySelector(".book").style.display = "block";
+  let cover = document.querySelector(".cover");
+  let book = document.querySelector(".book");
+
+  if (cover) cover.style.display = "none";
+  if (book) book.style.display = "block";
 }
 
 /* ================= SAFE GET ================= */
 function get(id) {
-  return document.getElementById(id);
+  let el = document.getElementById(id);
+  if (!el) console.warn("Missing element:", id);
+  return el;
 }
 
 /* ================= ABOUT ================= */
@@ -91,7 +96,8 @@ function saveTasks() {
 /* ================= WEEK ================= */
 function getWeekKey() {
   let now = new Date();
-  return "week_" + now.getFullYear() + "_" + now.getMonth();
+  let week = Math.ceil(now.getDate() / 7);
+  return `week_${now.getFullYear()}_${now.getMonth()}_${week}`;
 }
 
 function saveWeek() {
@@ -144,8 +150,12 @@ function loadCurrent() {
   if (get("day")) get("day").value = data.day || "";
 }
 
-/* AUTO SAVE EVENTS */
-document.addEventListener("input", autoSave);
+/* FIXED AUTO SAVE */
+let saveTimeout;
+document.addEventListener("input", () => {
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(autoSave, 500);
+});
 
 /* ================= EMOJI RAIN ================= */
 function rain(emoji) {
