@@ -11,12 +11,9 @@ window.addEventListener("load", () => {
   loadWeek();
   loadCurrent();
 
-  showPage(0);
+  setupAutoSave();
 
-  // auto save typing
-  document.querySelectorAll("#journal textarea").forEach(el=>{
-    el.addEventListener("input", autoSaveCurrent);
-  });
+  showPage(0);
 });
 
 /* ================= PAGE SYSTEM ================= */
@@ -63,13 +60,11 @@ function openJournal() {
 
   let about = JSON.parse(localStorage.getItem("aboutMe") || "{}");
 
-  if (about && about.name && about.name.trim() !== "") {
-    currentPage = 1; // skip About Me
+  if (about.name) {
+    showPage(1); // skip About Me
   } else {
-    currentPage = 0;
+    showPage(0);
   }
-
-  showPage(currentPage);
 }
 
 function openSettings() {
@@ -80,11 +75,11 @@ function openSettings() {
 /* ================= ABOUT ME ================= */
 function saveAbout() {
   const data = {
-    name: document.getElementById("aboutName")?.value || "",
-    age: document.getElementById("aboutAge")?.value || "",
-    dream: document.getElementById("aboutDream")?.value || "",
-    likes: document.getElementById("aboutLikes")?.value || "",
-    place: document.getElementById("aboutPlace")?.value || ""
+    name: document.getElementById("aboutName").value,
+    age: document.getElementById("aboutAge").value,
+    dream: document.getElementById("aboutDream").value,
+    likes: document.getElementById("aboutLikes").value,
+    place: document.getElementById("aboutPlace").value
   };
 
   localStorage.setItem("aboutMe", JSON.stringify(data));
@@ -111,28 +106,40 @@ function loadAbout() {
 
 /* AUTO SAVE ABOUT */
 document.addEventListener("input", (e) => {
-  if (
-    e.target.id === "aboutName" ||
-    e.target.id === "aboutAge" ||
-    e.target.id === "aboutDream" ||
-    e.target.id === "aboutLikes" ||
-    e.target.id === "aboutPlace"
-  ) {
+  if (e.target.closest(".about-info")) {
     saveAbout();
   }
 });
 
-/* PHOTO REMOVE */
+/* ================= PHOTO ================= */
+document.getElementById("photoUpload")?.addEventListener("change", function(e){
+  const file = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(){
+    const img = document.getElementById("profilePreview");
+    img.src = reader.result;
+    img.style.display = "block";
+    localStorage.setItem("profileImage", reader.result);
+  };
+
+  if(file) reader.readAsDataURL(file);
+});
+
+window.addEventListener("load", ()=>{
+  const saved = localStorage.getItem("profileImage");
+  if(saved){
+    const img = document.getElementById("profilePreview");
+    img.src = saved;
+    img.style.display = "block";
+  }
+});
+
 function removePhoto(){
   const img = document.getElementById("profilePreview");
-
-  if(!img) return;
-
   img.src = "";
   img.style.display = "none";
-
   localStorage.removeItem("profileImage");
-
   showSaveMessage("Photo removed ❌");
 }
 
@@ -142,16 +149,21 @@ function saveEntry() {
 
   const entry = {
     date: new Date().toLocaleString(),
-    reflection: document.getElementById("journalText")?.value || "",
-    feeling: document.getElementById("feel")?.value || "",
-    why: document.getElementById("why")?.value || "",
-    story: document.getElementById("storyText")?.value || ""
+    about: JSON.parse(localStorage.getItem("aboutMe") || "{}"),
+    week: JSON.parse(localStorage.getItem(getWeekKey()) || "{}"),
+    tasks: JSON.parse(localStorage.getItem(getTodayKey()) || "[]"),
+    reflection: journalText?.value || "",
+    feeling: feel?.value || "",
+    why: why?.value || "",
+    story: storyText?.value || ""
   };
 
   entries.unshift(entry);
   localStorage.setItem("entries", JSON.stringify(entries));
 
-  showSaveMessage("Entry saved 💖");
+  localStorage.removeItem("currentEntry");
+
+  showSaveMessage("Saved full entry 💖");
   loadEntries();
   goHome();
 }
@@ -167,14 +179,11 @@ function loadEntries() {
   entries.forEach((e, i) => {
     let div = document.createElement("div");
 
-    let text = e.reflection || e.story || "No content";
-
     div.innerHTML = `
-      <p><b>${e.date}</b></p>
-      <p>${text.substring(0,50)}...</p>
+      <b>${e.date}</b><br>
+      ${e.reflection?.substring(0,40) || "No text"}...<br>
       <button onclick="viewEntry(${i})">📖 Open</button>
-      <button onclick="deleteEntry(${i})">❌ Delete</button>
-      <hr>
+      <button onclick="deleteEntry(${i})">❌</button>
     `;
 
     box.appendChild(div);
@@ -183,11 +192,24 @@ function loadEntries() {
 
 function deleteEntry(i) {
   let entries = JSON.parse(localStorage.getItem("entries") || "[]");
-
   entries.splice(i, 1);
-
   localStorage.setItem("entries", JSON.stringify(entries));
   loadEntries();
+}
+
+/* ================= VIEW ENTRY ================= */
+function viewEntry(i){
+  let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+  let e = entries[i];
+
+  alert(`📅 ${e.date}
+
+💭 ${e.feeling}
+🌸 ${e.why}
+
+📖 ${e.reflection}
+
+📚 ${e.story}`);
 }
 
 /* ================= TODO ================= */
@@ -196,9 +218,7 @@ function getTodayKey() {
 }
 
 function addTask() {
-  let input = document.getElementById("taskInput");
-  let text = input.value.trim();
-
+  let text = taskInput.value.trim();
   if (!text) return;
 
   let tasks = JSON.parse(localStorage.getItem(getTodayKey()) || "[]");
@@ -207,7 +227,7 @@ function addTask() {
 
   localStorage.setItem(getTodayKey(), JSON.stringify(tasks));
 
-  input.value = "";
+  taskInput.value = "";
   loadTasks();
 }
 
@@ -223,10 +243,8 @@ function loadTasks() {
     let div = document.createElement("div");
 
     div.innerHTML = `
-      <label>
-        <input type="checkbox" ${t.done ? "checked" : ""} onchange="toggleTask(${i})">
-        ${t.text}
-      </label>
+      <input type="checkbox" ${t.done ? "checked":""} onchange="toggleTask(${i})">
+      ${t.text}
       <button onclick="deleteTask(${i})">❌</button>
     `;
 
@@ -234,15 +252,15 @@ function loadTasks() {
   });
 }
 
-function toggleTask(i) {
+function toggleTask(i){
   let tasks = JSON.parse(localStorage.getItem(getTodayKey()) || "[]");
   tasks[i].done = !tasks[i].done;
   localStorage.setItem(getTodayKey(), JSON.stringify(tasks));
 }
 
-function deleteTask(i) {
+function deleteTask(i){
   let tasks = JSON.parse(localStorage.getItem(getTodayKey()) || "[]");
-  tasks.splice(i, 1);
+  tasks.splice(i,1);
   localStorage.setItem(getTodayKey(), JSON.stringify(tasks));
   loadTasks();
 }
@@ -257,15 +275,15 @@ function getWeekKey() {
 
 function saveWeek() {
   const data = {
-    title: document.getElementById("weekTitle")?.value || "",
-    notes: document.getElementById("weekNotes")?.value || "",
-    mon: document.getElementById("mon")?.value || "",
-    tue: document.getElementById("tue")?.value || "",
-    wed: document.getElementById("wed")?.value || "",
-    thu: document.getElementById("thu")?.value || "",
-    fri: document.getElementById("fri")?.value || "",
-    sat: document.getElementById("sat")?.value || "",
-    sun: document.getElementById("sun")?.value || ""
+    title: weekTitle?.value || "",
+    notes: weekNotes?.value || "",
+    mon: mon?.value || "",
+    tue: tue?.value || "",
+    wed: wed?.value || "",
+    thu: thu?.value || "",
+    fri: fri?.value || "",
+    sat: sat?.value || "",
+    sun: sun?.value || ""
   };
 
   localStorage.setItem(getWeekKey(), JSON.stringify(data));
@@ -274,27 +292,26 @@ function saveWeek() {
 function loadWeek() {
   let data = JSON.parse(localStorage.getItem(getWeekKey()) || "{}");
 
-  if (!document.getElementById("weekTitle")) return;
+  if (!weekTitle) return;
 
-  document.getElementById("weekTitle").value = data.title || "";
-  document.getElementById("weekNotes").value = data.notes || "";
-
-  document.getElementById("mon").value = data.mon || "";
-  document.getElementById("tue").value = data.tue || "";
-  document.getElementById("wed").value = data.wed || "";
-  document.getElementById("thu").value = data.thu || "";
-  document.getElementById("fri").value = data.fri || "";
-  document.getElementById("sat").value = data.sat || "";
-  document.getElementById("sun").value = data.sun || "";
+  weekTitle.value = data.title || "";
+  weekNotes.value = data.notes || "";
+  mon.value = data.mon || "";
+  tue.value = data.tue || "";
+  wed.value = data.wed || "";
+  thu.value = data.thu || "";
+  fri.value = data.fri || "";
+  sat.value = data.sat || "";
+  sun.value = data.sun || "";
 }
 
-/* ================= AUTO SAVE ================= */
+/* ================= AUTO SAVE CURRENT ================= */
 function autoSaveCurrent(){
   const data = {
-    reflection: document.getElementById("journalText")?.value || "",
-    feeling: document.getElementById("feel")?.value || "",
-    why: document.getElementById("why")?.value || "",
-    story: document.getElementById("storyText")?.value || ""
+    reflection: journalText?.value || "",
+    feeling: feel?.value || "",
+    why: why?.value || "",
+    story: storyText?.value || ""
   };
 
   localStorage.setItem("currentEntry", JSON.stringify(data));
@@ -303,32 +320,48 @@ function autoSaveCurrent(){
 function loadCurrent(){
   let data = JSON.parse(localStorage.getItem("currentEntry") || "{}");
 
-  if(data.reflection) document.getElementById("journalText").value = data.reflection;
-  if(data.feeling) document.getElementById("feel").value = data.feeling;
-  if(data.why) document.getElementById("why").value = data.why;
-  if(data.story) document.getElementById("storyText").value = data.story;
+  if(data.reflection) journalText.value = data.reflection;
+  if(data.feeling) feel.value = data.feeling;
+  if(data.why) why.value = data.why;
+  if(data.story) storyText.value = data.story;
 }
 
-/* ================= VIEW ENTRY ================= */
-function viewEntry(i){
-  let entries = JSON.parse(localStorage.getItem("entries") || "[]");
-  let e = entries[i];
-
-  alert(`📅 ${e.date}
-
-💭 ${e.feeling}
-
-🌸 ${e.why}
-
-📖 ${e.reflection}
-
-📚 ${e.story}`);
+function setupAutoSave(){
+  document.querySelectorAll("#journal textarea").forEach(el=>{
+    el.addEventListener("input", autoSaveCurrent);
+  });
 }
 
-/* ================= MESSAGE ================= */
+/* ================= SETTINGS ================= */
+function setMusic(src){
+  let music = document.getElementById("bgMusic");
+  music.src = src;
+  music.play().catch(()=>{});
+}
+
+function setFont(f){
+  document.body.style.fontFamily = f;
+}
+
+function setBG(img){
+  if(!img){
+    document.body.style.background = "linear-gradient(135deg,#fbc2eb,#a6c1ee)";
+    return;
+  }
+  document.body.style.backgroundImage = `url(${img})`;
+  document.body.style.backgroundSize = "cover";
+}
+
+function setBGColor(colors){
+  if(!colors) return;
+  let c = colors.split(",");
+  document.body.style.background = `linear-gradient(135deg, ${c[0]}, ${c[1]})`;
+}
+
+/* ================= SAVE MESSAGE ================= */
 function showSaveMessage(text="Saved 💖"){
   let msg = document.getElementById("saveMsg");
-  if (!msg) return;
+  if(!msg) return;
 
   msg.innerText = text;
   msg.style.opacity = "1";
