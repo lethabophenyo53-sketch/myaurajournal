@@ -6,10 +6,10 @@ window.addEventListener("load", () => {
   pages = document.querySelectorAll(".page");
 
   loadAbout();
-  loadEntries();
   loadTasks();
   loadWeek();
   loadCurrent();
+  loadEntries();
 
   setupAutoSave();
 
@@ -55,10 +55,10 @@ function saveAbout() {
 function loadAbout() {
   let data = JSON.parse(localStorage.getItem("aboutMe") || "{}");
 
-  if (name) name.value = data.name || "";
-  if (age) age.value = data.age || "";
-  if (dreams) dreams.value = data.dreams || "";
-  if (energy) energy.value = data.energy || "";
+  document.getElementById("name").value = data.name || "";
+  document.getElementById("age").value = data.age || "";
+  document.getElementById("dreams").value = data.dreams || "";
+  document.getElementById("energy").value = data.energy || "";
 }
 
 /* AUTO SAVE ABOUT */
@@ -76,10 +76,10 @@ function getTodayKey() {
 function loadTasks() {
   let tasks = JSON.parse(localStorage.getItem(getTodayKey()) || "[]");
 
-  tasks.forEach((t, i) => {
-    let el = document.getElementById("todo" + (i + 1));
-    if (el) el.value = t.text;
-  });
+  for (let i = 1; i <= 4; i++) {
+    let el = document.getElementById("todo" + i);
+    if (el) el.value = tasks[i - 1]?.text || "";
+  }
 }
 
 function saveTasks() {
@@ -101,14 +101,14 @@ function getWeekKey() {
 
 function saveWeek() {
   const data = {
-    mon: mon?.value || "",
-    tue: tue?.value || "",
-    wed: wed?.value || "",
-    thu: thu?.value || "",
-    fri: fri?.value || "",
-    sat: sat?.value || "",
-    sun: sun?.value || "",
-    notes: weekly_notes?.value || ""
+    mon: document.getElementById("mon")?.value || "",
+    tue: document.getElementById("tue")?.value || "",
+    wed: document.getElementById("wed")?.value || "",
+    thu: document.getElementById("thu")?.value || "",
+    fri: document.getElementById("fri")?.value || "",
+    sat: document.getElementById("sat")?.value || "",
+    sun: document.getElementById("sun")?.value || "",
+    notes: document.getElementById("weekly_notes")?.value || ""
   };
 
   localStorage.setItem(getWeekKey(), JSON.stringify(data));
@@ -117,14 +117,14 @@ function saveWeek() {
 function loadWeek() {
   let data = JSON.parse(localStorage.getItem(getWeekKey()) || "{}");
 
-  if (mon) mon.value = data.mon || "";
-  if (tue) tue.value = data.tue || "";
-  if (wed) wed.value = data.wed || "";
-  if (thu) thu.value = data.thu || "";
-  if (fri) fri.value = data.fri || "";
-  if (sat) sat.value = data.sat || "";
-  if (sun) sun.value = data.sun || "";
-  if (weekly_notes) weekly_notes.value = data.notes || "";
+  document.getElementById("mon").value = data.mon || "";
+  document.getElementById("tue").value = data.tue || "";
+  document.getElementById("wed").value = data.wed || "";
+  document.getElementById("thu").value = data.thu || "";
+  document.getElementById("fri").value = data.fri || "";
+  document.getElementById("sat").value = data.sat || "";
+  document.getElementById("sun").value = data.sun || "";
+  document.getElementById("weekly_notes").value = data.notes || "";
 }
 
 /* ================= DAILY SAVE ================= */
@@ -137,8 +137,8 @@ function autoSaveCurrent() {
     feel: document.getElementById("feel")?.value || "",
     why: document.getElementById("why")?.value || "",
     day: document.getElementById("day")?.value || "",
-    notes: document.getElementById("notes")?.value || "",
-    close: document.getElementById("close")?.value || ""
+    notes: document.querySelector(".lined")?.value || "",
+    close: document.querySelector(".big-input")?.value || ""
   };
 
   localStorage.setItem(getTodayJournalKey(), JSON.stringify(data));
@@ -150,13 +150,12 @@ function autoSaveCurrent() {
 function loadCurrent() {
   let data = JSON.parse(localStorage.getItem(getTodayJournalKey()) || "{}");
 
-  if (feel) feel.value = data.feel || "";
-  if (why) why.value = data.why || "";
-  if (day) day.value = data.day || "";
-  if (notes) notes.value = data.notes || "";
-  if (close) close.value = data.close || "";
+  document.getElementById("feel").value = data.feel || "";
+  document.getElementById("why").value = data.why || "";
+  document.getElementById("day").value = data.day || "";
 }
 
+/* AUTO SAVE ALL INPUTS */
 function setupAutoSave() {
   document.querySelectorAll("textarea, input").forEach(el => {
     el.addEventListener("input", autoSaveCurrent);
@@ -169,9 +168,9 @@ function saveEntry() {
 
   const entry = {
     date: new Date().toLocaleString(),
-    feel: feel?.value || "",
-    why: why?.value || "",
-    day: day?.value || ""
+    feel: document.getElementById("feel")?.value || "",
+    why: document.getElementById("why")?.value || "",
+    day: document.getElementById("day")?.value || ""
   };
 
   entries.unshift(entry);
@@ -196,7 +195,7 @@ function loadEntries() {
 
 /* ================= EMOJI RAIN ================= */
 function rain(emoji) {
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 25; i++) {
     let drop = document.createElement("div");
     drop.className = "emoji-drop";
     drop.innerText = emoji;
