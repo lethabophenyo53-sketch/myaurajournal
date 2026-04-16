@@ -13,13 +13,11 @@ window.onload = function () {
   loadStory();
 
   showPage(0);
-};
 
-window.onload = function () {
+  // story continue
   let savedStory = localStorage.getItem("story");
-
   if (savedStory && confirm("Continue your story?")) {
-    document.getElementById("storyText").value = savedStory;
+    if (get("storyText")) get("storyText").value = savedStory;
   }
 };
 
@@ -206,8 +204,9 @@ function removeTask(index) {
   loadTasks();
 }
 
-function saveTasks(tasks) {
-  localStorage.setItem("tasks_" + new Date().toDateString(), JSON.stringify(tasks));
+function saveTasks() {
+  let tasks = JSON.parse(localStorage.getItem(getTodayKey()) || "[]");
+  localStorage.setItem(getTodayKey(), JSON.stringify(tasks));
 }
 
 // ================= STORY =================
@@ -255,6 +254,19 @@ function loadEntries() {
 
   container.innerHTML = "";
 
+  let entries = JSON.parse(localStorage.getItem("entries")) || [];
+
+  entries.forEach(e => {
+    let div = document.createElement("div");
+
+    div.innerHTML = `
+      <h3>${e.date}</h3>
+      <p>${e.reflection?.feel || ""}</p>
+    `;
+
+    container.appendChild(div);
+  });
+}
 function loadSavedEntries() {
   let container = document.getElementById("savedContainer");
   container.innerHTML = "";
@@ -349,30 +361,31 @@ window.addEventListener("load", () => {
 });
 
 // when user uploads photo
-const photoInput = document.getElementById("photoUpload");
 
-if (photoInput) {
-  photoInput.addEventListener("change", function () {
-    const file = this.files[0];
+window.onload = function () {
+  // ... your other code
 
-    if (!file) return;
+  const photoInput = document.getElementById("photoUpload");
 
-    const reader = new FileReader();
+  if (photoInput) {
+    photoInput.addEventListener("change", function () {
+      const file = this.files[0];
+      if (!file) return;
 
-    reader.onload = function () {
-      const img = document.getElementById("profilePreview");
+      const reader = new FileReader();
 
-      img.src = reader.result;
-      img.style.display = "block";
+      reader.onload = function () {
+        const img = document.getElementById("profilePreview");
+        img.src = reader.result;
+        img.style.display = "block";
 
-      // save to localStorage
-      localStorage.setItem("profilePhoto", reader.result);
-    };
+        localStorage.setItem("profilePhoto", reader.result);
+      };
 
-    reader.readAsDataURL(file);
-  });
-}
-
+      reader.readAsDataURL(file);
+    });
+  }
+};
 // remove photo
 function removePhoto() {
   const img = document.getElementById("profilePreview");
