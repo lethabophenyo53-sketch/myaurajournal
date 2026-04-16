@@ -15,6 +15,14 @@ window.onload = function () {
   showPage(0);
 };
 
+window.onload = function () {
+  let savedStory = localStorage.getItem("story");
+
+  if (savedStory && confirm("Continue your story?")) {
+    document.getElementById("storyText").value = savedStory;
+  }
+};
+
 // ================= PAGE SYSTEM =================
 function showPage(index) {
   pages.forEach(p => p.classList.remove("active"));
@@ -198,8 +206,8 @@ function removeTask(index) {
   loadTasks();
 }
 
-function saveTasks() {
-  // already saved in add/remove
+function saveTasks(tasks) {
+  localStorage.setItem("tasks_" + new Date().toDateString(), JSON.stringify(tasks));
 }
 
 // ================= STORY =================
@@ -216,32 +224,51 @@ function loadStory() {
 
 // ================= ENTRIES =================
 function saveEntry() {
-  let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+  let entry = {
+    date: new Date().toLocaleDateString(),
 
-  entries.push({
-    text: get("journalText")?.value || "",
-    date: new Date().toLocaleDateString()
-  });
+    reflection: {
+      feel: document.getElementById("feel")?.value,
+      why: document.getElementById("why")?.value,
+      text: document.getElementById("journalText")?.value
+    },
+
+    story: document.getElementById("storyText")?.value,
+
+    closing: {
+      feel: document.querySelector(".closing-card textarea")?.value,
+      grateful: document.querySelectorAll(".closing-card textarea")[1]?.value
+    }
+  };
+
+  let entries = JSON.parse(localStorage.getItem("entries")) || [];
+
+  entries.push(entry);
 
   localStorage.setItem("entries", JSON.stringify(entries));
-  showSaveMessage();
-}
 
+  alert("Saved full entry 💖");
+}
 function loadEntries() {
   const container = get("entries");
   if (!container) return;
 
   container.innerHTML = "";
 
-  let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+function loadSavedEntries() {
+  let container = document.getElementById("savedContainer");
+  container.innerHTML = "";
 
-  entries.slice().reverse().forEach(e => {
-    const div = document.createElement("div");
-    div.className = "entry";
+  let entries = JSON.parse(localStorage.getItem("entries")) || [];
+
+  entries.forEach(e => {
+    let div = document.createElement("div");
 
     div.innerHTML = `
-      <h4>${e.date}</h4>
-      <p>${e.text}</p>
+      <h3>${e.date}</h3>
+      <p><b>Feeling:</b> ${e.reflection?.feel}</p>
+      <p><b>Story:</b> ${e.story}</p>
+      <p><b>Grateful:</b> ${e.closing?.grateful}</p>
     `;
 
     container.appendChild(div);
@@ -354,4 +381,11 @@ function removePhoto() {
   img.style.display = "none";
 
   localStorage.removeItem("profilePhoto");
+}
+
+function openSaved() {
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("savedPage").classList.remove("hidden");
+
+  loadSavedEntries();
 }
