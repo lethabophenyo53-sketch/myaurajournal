@@ -356,43 +356,28 @@ document.addEventListener("input", () => {
 
 /* ================= PHOTO UPLOAD ================= */
 
-// load saved photo when app starts
-window.addEventListener("load", () => {
-  const savedPhoto = localStorage.getItem("profilePhoto");
+function setupPhotoUpload() {
+  const photoInput = get("photoUpload");
 
-  if (savedPhoto) {
-    const img = document.getElementById("profilePreview");
-    if (img) {
-      img.src = savedPhoto;
+  if (!photoInput) return;
+
+  photoInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function () {
+      const img = get("profilePreview");
+      img.src = reader.result;
       img.style.display = "block";
-    }
-  }
-});
 
-// when user uploads photo
+      localStorage.setItem("profilePhoto", reader.result);
+    };
 
-window.onload = function () {
-  // ... your other code
-
-  const photoInput = document.getElementById("photoUpload");
-
-  if (photoInput) {
-    photoInput.addEventListener("change", function () {
-      const file = this.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-
-      reader.onload = function () {
-        const img = document.getElementById("profilePreview");
-        img.src = reader.result;
-        img.style.display = "block";
-
-        localStorage.setItem("profilePhoto", reader.result);
-      };
-
-      reader.readAsDataURL(file);
-    });
+    reader.readAsDataURL(file);
+  });
+}
   }
 };
 // remove photo
