@@ -77,7 +77,10 @@ function goHome() {
   get("home").classList.remove("hidden");
   loadEntries();
 }
-
+function closeSaved() {
+  document.getElementById("savedPage").classList.add("hidden");
+  document.getElementById("home").classList.remove("hidden");
+}
 // ================= SAFE GET =================
 function get(id) {
   return document.getElementById(id);
@@ -396,4 +399,7 @@ function openSaved() {
   get("home").classList.add("hidden");
   get("savedPage").classList.remove("hidden");
   loadSavedEntries();
+}
+
+hidden");
 }
