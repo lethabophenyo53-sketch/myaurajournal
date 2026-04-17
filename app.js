@@ -12,13 +12,22 @@ window.onload = function () {
   loadTasks();
   loadStory();
 
-  showPage(0);
+  // load saved photo
+  const savedPhoto = localStorage.getItem("profilePhoto");
+  if (savedPhoto && get("profilePreview")) {
+    get("profilePreview").src = savedPhoto;
+    get("profilePreview").style.display = "block";
+  }
 
   // story continue
   let savedStory = localStorage.getItem("story");
   if (savedStory && confirm("Continue your story?")) {
     if (get("storyText")) get("storyText").value = savedStory;
   }
+
+  showPage(0);
+
+  setupPhotoUpload();
 };
 
 // ================= PAGE SYSTEM =================
