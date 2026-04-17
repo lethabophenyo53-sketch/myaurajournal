@@ -26,7 +26,6 @@ window.onload = function () {
   }
 
   showPage(0);
-
   setupPhotoUpload();
 };
 
@@ -50,15 +49,14 @@ function prev() {
 
 // ================= NAVIGATION =================
 function enterApp() {
-  document.getElementById("cover").style.display = "none";
-  document.getElementById("home").classList.remove("hidden");
+  get("cover").style.display = "none";
+  get("home").classList.remove("hidden");
 }
 
 function openJournal() {
-  document.getElementById("home").classList.add("hidden");
-  document.getElementById("settings").classList.add("hidden");
-  document.getElementById("journal").classList.remove("hidden");
-
+  get("home").classList.add("hidden");
+  get("settings").classList.add("hidden");
+  get("journal").classList.remove("hidden");
   showPage(0);
 }
 
@@ -68,15 +66,15 @@ function openJournalPage(i) {
 }
 
 function openSettings() {
-  document.getElementById("home").classList.add("hidden");
-  document.getElementById("settings").classList.remove("hidden");
+  get("home").classList.add("hidden");
+  get("settings").classList.remove("hidden");
 }
 
 function goHome() {
-  document.getElementById("journal").classList.add("hidden");
-  document.getElementById("settings").classList.add("hidden");
-  document.getElementById("home").classList.remove("hidden");
-
+  get("journal").classList.add("hidden");
+  get("settings").classList.add("hidden");
+  get("savedPage")?.classList.add("hidden");
+  get("home").classList.remove("hidden");
   loadEntries();
 }
 
@@ -110,7 +108,6 @@ function loadAbout() {
   if (cards[3]) cards[3].value = data.likes || "";
   if (cards[4]) cards[4].value = data.place || "";
 }
-
 
 // ================= WEEK =================
 function getWeekKey() {
@@ -159,7 +156,6 @@ function autoSave() {
   };
 
   localStorage.setItem("todayEntry", JSON.stringify(data));
-
   saveTasks();
 }
 
@@ -241,38 +237,39 @@ function loadStory() {
 function saveEntry() {
   let entry = {
     date: new Date().toLocaleDateString(),
-
     reflection: {
-      feel: document.getElementById("feel")?.value,
-      why: document.getElementById("why")?.value,
-      text: document.getElementById("journalText")?.value
+      feel: get("feel")?.value,
+      why: get("why")?.value,
+      text: get("journalText")?.value
     },
-
-    story: document.getElementById("storyText")?.value,
-
+    story: get("storyText")?.value,
     closing: {
       feel: document.querySelector(".closing-card textarea")?.value,
       grateful: document.querySelectorAll(".closing-card textarea")[1]?.value
     }
   };
 
-  let entries = JSON.parse(localStorage.getItem("entries")) || [];
-
+  let entries = JSON.parse(localStorage.getItem("entries") || "[]");
   entries.push(entry);
 
   localStorage.setItem("entries", JSON.stringify(entries));
-
   alert("Saved full entry 💖");
 }
+
 function loadEntries() {
   const container = get("entries");
   if (!container) return;
 
   container.innerHTML = "";
 
-  let entries = JSON.parse(localStorage.getItem("entries")) || [];
+  let entries = JSON.parse(localStorage.getItem("entries") || "[]");
 
-  entries.forEach(e => {
+  if (entries.length === 0) {
+    container.innerHTML = "<p style='text-align:center; opacity:0.6;'>No entries yet 💭</p>";
+    return;
+  }
+
+  entries.slice().reverse().forEach(e => {
     let div = document.createElement("div");
 
     div.innerHTML = `
@@ -283,11 +280,14 @@ function loadEntries() {
     container.appendChild(div);
   });
 }
+
 function loadSavedEntries() {
-  let container = document.getElementById("savedContainer");
+  let container = get("savedPage");
+  if (!container) return;
+
   container.innerHTML = "";
 
-  let entries = JSON.parse(localStorage.getItem("entries")) || [];
+  let entries = JSON.parse(localStorage.getItem("entries") || "[]");
 
   entries.forEach(e => {
     let div = document.createElement("div");
@@ -311,7 +311,6 @@ function setFont(font) {
 
 function setMusic(src) {
   const audio = get("bgMusic");
-
   if (!audio) return;
 
   audio.pause();
@@ -334,14 +333,12 @@ function setBG(img) {
 
 function setBGColor(gradient) {
   if (!gradient) return;
-
   document.body.style.background = `linear-gradient(135deg, ${gradient})`;
 }
 
 // ================= SAVE MESSAGE =================
 function showSaveMessage() {
   let msg = document.querySelector(".save-msg");
-
   if (!msg) return;
 
   msg.style.opacity = "1";
@@ -358,15 +355,13 @@ document.addEventListener("input", () => {
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(() => {
     autoSave();
-    saveAbout();   // 👈 THIS FIXES ABOUT ME
+    saveAbout();
   }, 500);
 });
 
-/* ================= PHOTO UPLOAD ================= */
-
+// ================= PHOTO =================
 function setupPhotoUpload() {
   const photoInput = get("photoUpload");
-
   if (!photoInput) return;
 
   photoInput.addEventListener("change", function () {
@@ -386,21 +381,19 @@ function setupPhotoUpload() {
     reader.readAsDataURL(file);
   });
 }
-  }
-};
-// remove photo
+
 function removePhoto() {
-  const img = document.getElementById("profilePreview");
+  const img = get("profilePreview");
+  if (!img) return;
 
   img.src = "";
   img.style.display = "none";
-
   localStorage.removeItem("profilePhoto");
 }
 
+// ================= SAVED PAGE =================
 function openSaved() {
-  document.getElementById("home").classList.add("hidden");
-  document.getElementById("savedPage").classList.remove("hidden");
-
+  get("home").classList.add("hidden");
+  get("savedPage").classList.remove("hidden");
   loadSavedEntries();
 }
