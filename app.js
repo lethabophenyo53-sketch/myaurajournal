@@ -108,6 +108,10 @@ function loadAbout() {
   if (get("place")) get("place").value = data.place || "";
 }
 
+document.addEventListener("input", () => {
+  saveAbout(); // 👈 THIS WAS MISSING
+});
+
 // ================= WEEK =================
 function getWeekKey() {
   let now = new Date();
