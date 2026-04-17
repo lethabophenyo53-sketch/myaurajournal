@@ -87,30 +87,30 @@ function get(id) {
 
 // ================= ABOUT =================
 function saveAbout() {
+  const cards = document.querySelectorAll(".about-card textarea");
+
   const data = {
-    name: get("name")?.value || "",
-    age: get("age")?.value || "",
-    dreams: get("dreams")?.value || "",
-    likes: get("likes")?.value || "",
-    place: get("place")?.value || ""
+    name: cards[0]?.value || "",
+    age: cards[1]?.value || "",
+    dreams: cards[2]?.value || "",
+    likes: cards[3]?.value || "",
+    place: cards[4]?.value || ""
   };
 
   localStorage.setItem("aboutMe", JSON.stringify(data));
 }
 
 function loadAbout() {
-  let data = JSON.parse(localStorage.getItem("aboutMe") || "{}");
+  const data = JSON.parse(localStorage.getItem("aboutMe") || "{}");
+  const cards = document.querySelectorAll(".about-card textarea");
 
-  if (get("name")) get("name").value = data.name || "";
-  if (get("age")) get("age").value = data.age || "";
-  if (get("dreams")) get("dreams").value = data.dreams || "";
-  if (get("likes")) get("likes").value = data.likes || "";
-  if (get("place")) get("place").value = data.place || "";
+  if (cards[0]) cards[0].value = data.name || "";
+  if (cards[1]) cards[1].value = data.age || "";
+  if (cards[2]) cards[2].value = data.dreams || "";
+  if (cards[3]) cards[3].value = data.likes || "";
+  if (cards[4]) cards[4].value = data.place || "";
 }
 
-document.addEventListener("input", () => {
-  saveAbout(); // 👈 THIS WAS MISSING
-});
 
 // ================= WEEK =================
 function getWeekKey() {
@@ -120,14 +120,16 @@ function getWeekKey() {
 }
 
 function saveWeek() {
+  const days = document.querySelectorAll(".day-card textarea");
+
   const data = {
-    mon: get("mon")?.value || "",
-    tue: get("tue")?.value || "",
-    wed: get("wed")?.value || "",
-    thu: get("thu")?.value || "",
-    fri: get("fri")?.value || "",
-    sat: get("sat")?.value || "",
-    sun: get("sun")?.value || ""
+    mon: days[0]?.value || "",
+    tue: days[1]?.value || "",
+    wed: days[2]?.value || "",
+    thu: days[3]?.value || "",
+    fri: days[4]?.value || "",
+    sat: days[5]?.value || "",
+    sun: days[6]?.value || ""
   };
 
   localStorage.setItem(getWeekKey(), JSON.stringify(data));
@@ -135,15 +137,16 @@ function saveWeek() {
 }
 
 function loadWeek() {
-  let data = JSON.parse(localStorage.getItem(getWeekKey()) || "{}");
+  const data = JSON.parse(localStorage.getItem(getWeekKey()) || "{}");
+  const days = document.querySelectorAll(".day-card textarea");
 
-  if (get("mon")) get("mon").value = data.mon || "";
-  if (get("tue")) get("tue").value = data.tue || "";
-  if (get("wed")) get("wed").value = data.wed || "";
-  if (get("thu")) get("thu").value = data.thu || "";
-  if (get("fri")) get("fri").value = data.fri || "";
-  if (get("sat")) get("sat").value = data.sat || "";
-  if (get("sun")) get("sun").value = data.sun || "";
+  if (days[0]) days[0].value = data.mon || "";
+  if (days[1]) days[1].value = data.tue || "";
+  if (days[2]) days[2].value = data.wed || "";
+  if (days[3]) days[3].value = data.thu || "";
+  if (days[4]) days[4].value = data.fri || "";
+  if (days[5]) days[5].value = data.sat || "";
+  if (days[6]) days[6].value = data.sun || "";
 }
 
 // ================= DAILY =================
@@ -353,10 +356,11 @@ let saveTimeout;
 
 document.addEventListener("input", () => {
   clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(autoSave, 500);
+  saveTimeout = setTimeout(() => {
+    autoSave();
+    saveAbout();   // 👈 THIS FIXES ABOUT ME
+  }, 500);
 });
-
-
 
 /* ================= PHOTO UPLOAD ================= */
 
